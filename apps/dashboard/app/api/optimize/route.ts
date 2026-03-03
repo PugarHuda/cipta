@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { OptimizerAgent } from "@cipta/agent"
 
-export async function POST(req: NextRequest) {
+export async function POST(req: NextRequest): Promise<NextResponse> {
   const { wallet, currentPrice } = await req.json()
   if (!wallet) return NextResponse.json({ error: "wallet required" }, { status: 400 })
 

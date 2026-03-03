@@ -1,13 +1,156 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { createClient } from "@supabase/supabase-js"
 import type { CreatorEarnings } from "@cipta/middleware"
+import { TrendingUp, Activity, DollarSign, Percent } from "lucide-react"
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_KEY!
 )
+
+function useCountUp(target: number, duration = 900, decimals = 4) {
+  const [value, setValue] = useState(0)
+  const rafRef = useRef<number>(0)
+
+  useEffect(() => {
+    if (target === 0) { setValue(0); return }
+    const start = Date.now()
+    const tick = () => {
+      const elapsed = Date.now() - start
+      const progress = Math.min(elapsed / duration, 1)
+      const eased = 1 - Math.pow(1 - progress, 3) // ease-out-cubic
+      setValue(parseFloat((eased * target).toFixed(decimals)))
+      if (progress < 1) rafRef.current = requestAnimationFrame(tick)
+    }
+    rafRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [target, duration, decimals])
+
+  return value
+}
+
+const METRICS = [
+  {
+    key: "total_earned_usd" as const,
+    label: "TOTAL EARNED",
+    sublabel: "ALL TIME · USDC",
+    icon: DollarSign,
+    accent: "var(--green)",
+    accentClass: "accent-top-green",
+    format: (v: number) => `$${v.toFixed(4)}`,
+    decimals: 4,
+  },
+  {
+    key: "today_earned_usd" as const,
+    label: "TODAY",
+    sublabel: "SINCE MIDNIGHT",
+    icon: TrendingUp,
+    accent: "var(--blue)",
+    accentClass: "accent-top-blue",
+    format: (v: number) => `$${v.toFixed(4)}`,
+    decimals: 4,
+  },
+  {
+    key: "total_requests" as const,
+    label: "BOT REQUESTS",
+    sublabel: "TOTAL ATTEMPTS",
+    icon: Activity,
+    accent: "var(--amber)",
+    accentClass: "accent-top-amber",
+    format: (v: number) => v.toLocaleString(),
+    decimals: 0,
+  },
+  {
+    key: "paid_requests" as const,
+    label: "PAID ACCESS",
+    sublabel: "CONVERSION RATE",
+    icon: Percent,
+    accent: "var(--purple)",
+    accentClass: "accent-top-purple",
+    format: (v: number) => v.toLocaleString(),
+    decimals: 0,
+  },
+]
+
+function MetricCard({
+  metric,
+  value,
+  total,
+  loading,
+}: {
+  metric: typeof METRICS[0]
+  value: number
+  total: number
+  loading: boolean
+}) {
+  const animated = useCountUp(loading ? 0 : value, 900, metric.decimals)
+  const Icon = metric.icon
+  const payRate = metric.key === "paid_requests" && total > 0
+    ? Math.round((value / total) * 100)
+    : null
+
+  return (
+    <div
+      className={`relative rounded-xl p-5 ${metric.accentClass} transition-all duration-300`}
+      style={{
+        background: "var(--bg-surface)",
+        border: "1px solid var(--border-subtle)",
+      }}
+    >
+      {/* Icon */}
+      <div
+        className="absolute top-4 right-4 w-7 h-7 rounded-lg flex items-center justify-center"
+        style={{ background: `${metric.accent}14` }}
+      >
+        <Icon size={13} style={{ color: metric.accent }} />
+      </div>
+
+      {/* Label */}
+      <div
+        className="text-[9px] tracking-[0.16em] font-[600] mb-3"
+        style={{ color: "var(--text-secondary)", fontFamily: "var(--font-ui)" }}
+      >
+        {metric.label}
+      </div>
+
+      {/* Value */}
+      {loading ? (
+        <div className="h-9 w-28 rounded-md loading-shimmer mb-2" />
+      ) : (
+        <div
+          className="text-3xl font-[700] leading-none mb-2"
+          style={{ color: metric.accent, fontFamily: "var(--font-data)" }}
+        >
+          {metric.format(animated)}
+        </div>
+      )}
+
+      {/* Sub */}
+      <div className="flex items-center gap-2">
+        <span
+          className="text-[9px] tracking-[0.1em]"
+          style={{ color: "var(--text-secondary)", fontFamily: "var(--font-ui)" }}
+        >
+          {metric.sublabel}
+        </span>
+        {payRate !== null && !loading && (
+          <span
+            className="text-[9px] font-[600] px-1.5 py-0.5 rounded"
+            style={{
+              background: `${metric.accent}18`,
+              color: metric.accent,
+              fontFamily: "var(--font-data)",
+            }}
+          >
+            {payRate}%
+          </span>
+        )}
+      </div>
+    </div>
+  )
+}
 
 export function EarningsCard({ walletAddress }: { walletAddress: string }) {
   const [earnings, setEarnings] = useState<CreatorEarnings>({
@@ -51,7 +194,6 @@ export function EarningsCard({ walletAddress }: { walletAddress: string }) {
 
     fetchEarnings()
 
-    // Realtime update via Supabase
     const channel = supabase
       .channel("earnings_realtime")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "access_logs" }, () => {
@@ -62,50 +204,16 @@ export function EarningsCard({ walletAddress }: { walletAddress: string }) {
     return () => { supabase.removeChannel(channel) }
   }, [walletAddress])
 
-  const stats = [
-    {
-      label: "Total Earned",
-      value: `$${earnings.total_earned_usd.toFixed(4)}`,
-      sub: "USDC · All time",
-      color: "text-green-400",
-      bg: "bg-green-500/10 border-green-500/20",
-    },
-    {
-      label: "Today",
-      value: `$${earnings.today_earned_usd.toFixed(4)}`,
-      sub: "USDC · Today",
-      color: "text-blue-400",
-      bg: "bg-blue-500/10 border-blue-500/20",
-    },
-    {
-      label: "Bot Requests",
-      value: earnings.total_requests.toLocaleString(),
-      sub: "Total attempted",
-      color: "text-purple-400",
-      bg: "bg-purple-500/10 border-purple-500/20",
-    },
-    {
-      label: "Paid Access",
-      value: earnings.paid_requests.toLocaleString(),
-      sub: `${earnings.total_requests > 0 ? Math.round((earnings.paid_requests / earnings.total_requests) * 100) : 0}% pay rate`,
-      color: "text-orange-400",
-      bg: "bg-orange-500/10 border-orange-500/20",
-    },
-  ]
-
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {stats.map((stat) => (
-        <div
-          key={stat.label}
-          className={`border rounded-xl p-5 ${stat.bg}`}
-        >
-          <div className="text-white/50 text-sm mb-2">{stat.label}</div>
-          <div className={`text-2xl font-bold ${stat.color} ${loading ? "animate-pulse" : ""}`}>
-            {loading ? "—" : stat.value}
-          </div>
-          <div className="text-white/30 text-xs mt-1">{stat.sub}</div>
-        </div>
+      {METRICS.map((metric) => (
+        <MetricCard
+          key={metric.key}
+          metric={metric}
+          value={earnings[metric.key] as number}
+          total={earnings.total_requests}
+          loading={loading}
+        />
       ))}
     </div>
   )

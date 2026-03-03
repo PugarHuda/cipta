@@ -3,14 +3,146 @@
 @tailwind utilities;
 
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --base-blue: #0052FF;
-  --base-blue-light: #3374FF;
+  /* Canvas */
+  --bg-base:     #0B0F19;
+  --bg-sidebar:  #0D1220;
+  --bg-surface:  #111827;
+  --bg-elevated: #172035;
+
+  /* Borders */
+  --border-dim:    rgba(255,255,255,0.04);
+  --border-subtle: rgba(255,255,255,0.07);
+  --border-medium: rgba(255,255,255,0.12);
+
+  /* Accents */
+  --green:   #10D9A0;
+  --blue:    #4F6EF7;
+  --amber:   #F59E0B;
+  --red:     #EF4444;
+  --purple:  #A78BFA;
+
+  /* Text */
+  --text-primary:   #E8EEF8;
+  --text-secondary: #4A607A;
+  --text-dim:       #253048;
+
+  /* Fonts */
+  --font-ui:   var(--font-syne), system-ui, sans-serif;
+  --font-data: var(--font-mono), 'Courier New', monospace;
 }
 
+* { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-inter);
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* ── Scrollbar ─────────────────────────────────── */
+::-webkit-scrollbar { width: 3px; height: 3px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-medium); border-radius: 2px; }
+
+/* ── Font helpers ──────────────────────────────── */
+.font-data { font-family: var(--font-data); }
+.font-ui   { font-family: var(--font-ui); }
+
+/* ── Subtle grid backdrop ──────────────────────── */
+.grid-bg {
+  background-image:
+    linear-gradient(var(--border-dim) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-dim) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ── Glass surface ─────────────────────────────── */
+.glass {
+  background: rgba(17, 24, 39, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
+}
+
+/* ── Glow utilities ────────────────────────────── */
+.glow-green  { box-shadow: 0 0 24px rgba(16, 217, 160, 0.12); }
+.glow-blue   { box-shadow: 0 0 24px rgba(79, 110, 247, 0.12); }
+.glow-amber  { box-shadow: 0 0 24px rgba(245, 158, 11, 0.12); }
+.glow-red    { box-shadow: 0 0 24px rgba(239, 68, 68, 0.12); }
+
+/* ── Scanline overlay (honeypot) ───────────────── */
+.scanlines {
+  position: relative;
+  overflow: hidden;
+}
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.06) 3px,
+    rgba(0,0,0,0.06) 4px
+  );
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ── Animations ────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1;   transform: scale(1);    }
+  50%       { opacity: 0.4; transform: scale(0.85); }
+}
+@keyframes threatPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  50%       { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0.12); }
+}
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+@keyframes shimmer {
+  from { background-position: -200% 0; }
+  to   { background-position: 200% 0; }
+}
+
+.fade-up        { animation: fadeUp 0.45s cubic-bezier(0.16,1,0.3,1) both; }
+.fade-up-1      { animation-delay: 0.04s; }
+.fade-up-2      { animation-delay: 0.10s; }
+.fade-up-3      { animation-delay: 0.16s; }
+.fade-up-4      { animation-delay: 0.22s; }
+.fade-up-5      { animation-delay: 0.28s; }
+.live-pulse     { animation: livePulse 2s ease-in-out infinite; }
+.threat-pulse   { animation: threatPulse 2.5s ease-in-out infinite; }
+.loading-shimmer {
+  background: linear-gradient(90deg, var(--bg-surface) 25%, var(--bg-elevated) 50%, var(--bg-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* ── Metric card top accent lines ──────────────── */
+.accent-top-green  { border-top: 1.5px solid var(--green);  }
+.accent-top-blue   { border-top: 1.5px solid var(--blue);   }
+.accent-top-amber  { border-top: 1.5px solid var(--amber);  }
+.accent-top-purple { border-top: 1.5px solid var(--purple); }
+
+/* ── Status dot ────────────────────────────────── */
+.dot-green  { background: var(--green);  }
+.dot-amber  { background: var(--amber);  }
+.dot-red    { background: var(--red);    }
+.dot-blue   { background: var(--blue);   }
+.dot-muted  { background: var(--text-secondary); }
