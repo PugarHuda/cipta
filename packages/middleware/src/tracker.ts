@@ -1,5 +1,5 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js"
-import type { AccessLog, CreatorEarnings, BotStats } from "./types"
+import type { AccessLog, CreatorEarnings, BotStats, HoneypotLog } from "./types"
 
 let supabase: SupabaseClient | null = null
 
@@ -12,6 +12,13 @@ export async function logAccess(log: Omit<AccessLog, "id">): Promise<void> {
 
   const { error } = await supabase.from("access_logs").insert(log)
   if (error) console.error("[Cipta] Failed to log access:", error.message)
+}
+
+export async function logHoneypot(log: Omit<HoneypotLog, "id">): Promise<void> {
+  if (!supabase) return
+
+  const { error } = await supabase.from("honeypot_logs").insert(log)
+  if (error) console.error("[Cipta] Failed to log honeypot:", error.message)
 }
 
 export async function getEarnings(creatorWallet: string): Promise<CreatorEarnings> {

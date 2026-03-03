@@ -6,6 +6,7 @@ import { EarningsCard } from "../../components/EarningsCard"
 import { BotActivityTable } from "../../components/BotActivityTable"
 import { EarningsChart } from "../../components/EarningsChart"
 import { EmbedCode } from "../../components/EmbedCode"
+import HoneypotCard from "../../components/HoneypotCard"
 
 export default function DashboardPage() {
   const { address, isConnected } = useAccount()
@@ -58,8 +59,15 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Bot activity table */}
-        <BotActivityTable walletAddress={address!} />
+        {/* Honeypot + Bot activity */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <HoneypotCard wallet={address!} />
+          </div>
+          <div className="lg:col-span-2">
+            <BotActivityTable walletAddress={address!} />
+          </div>
+        </div>
       </main>
     </div>
   )
