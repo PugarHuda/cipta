@@ -1,0 +1,23 @@
+{
+  "name": "@cipta/agent",
+  "version": "0.1.0",
+  "description": "Cipta AI agents — payer agent + optimizer agent",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "demo": "tsx src/demo.ts"
+  },
+  "dependencies": {
+    "@coinbase/agentkit": "^0.10.4",
+    "@x402/fetch": "^2.5.0",
+    "@x402/evm": "^2.5.0",
+    "@x402/core": "^2.5.0",
+    "viem": "^2.21.26",
+    "@supabase/supabase-js": "^2.98.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.0"
+  }
+}

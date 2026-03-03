@@ -1,0 +1,34 @@
+{
+  "name": "@cipta/dashboard",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^15.2.9",
+    "react": "^19",
+    "react-dom": "^19",
+    "@coinbase/onchainkit": "^1.1.2",
+    "wagmi": "^2.16.0",
+    "viem": "^2.21.26",
+    "@tanstack/react-query": "^5.40.0",
+    "@supabase/supabase-js": "^2.98.0",
+    "@cipta/middleware": "*",
+    "recharts": "^3.7.0",
+    "lucide-react": "^0.576.0",
+    "clsx": "^2.1.1"
+  },
+  "devDependencies": {
+    "typescript": "^5",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "tailwindcss": "^3.4.3",
+    "autoprefixer": "^10.4.19",
+    "postcss": "^8.4.38"
+  }
+}

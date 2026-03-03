@@ -1,0 +1,23 @@
+{
+  "name": "cipta",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cipta — Protect your content, earn from AI. Powered by x402 on Base.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "test": "turbo test",
+    "lint": "turbo lint",
+    "demo:agent": "tsx packages/agent/src/demo.ts"
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "typescript": "^5.4.0",
+    "tsx": "^4.7.0",
+    "@types/node": "^20.0.0"
+  }
+}
