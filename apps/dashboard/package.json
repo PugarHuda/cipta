@@ -17,7 +17,6 @@
     "viem": "^2.21.26",
     "@tanstack/react-query": "^5.40.0",
     "@supabase/supabase-js": "^2.98.0",
-    "@cipta/middleware": "*",
     "recharts": "^3.7.0",
     "lucide-react": "^0.576.0",
     "clsx": "^2.1.1"

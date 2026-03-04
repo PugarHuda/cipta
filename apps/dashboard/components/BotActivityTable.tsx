@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import supabase from "../lib/supabase"
 import { useRefreshTick } from "../context/RealtimeContext"
-import type { BotStats } from "@cipta/middleware"
+import type { BotStats } from "../lib/types"
 
 // Deterministic color per bot name
 function botColor(name: string): string {

@@ -3,7 +3,7 @@
 import { useEffect, useState, useRef } from "react"
 import supabase from "../lib/supabase"
 import { useRefreshTick } from "../context/RealtimeContext"
-import type { CreatorEarnings } from "@cipta/middleware"
+import type { CreatorEarnings } from "../lib/types"
 import { TrendingUp, Activity, DollarSign, Percent } from "lucide-react"
 
 function useCountUp(target: number, duration = 900, decimals = 4) {
