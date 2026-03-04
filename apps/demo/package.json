@@ -8,7 +8,7 @@
     "start": "node dist/server.js"
   },
   "dependencies": {
-    "@cipta/middleware": "*",
+    "@cipta/middleware": "file:./cipta-middleware-0.1.0.tgz",
     "express": "^4.19.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.0"
