@@ -1,6 +1,5 @@
 {
   "framework": "nextjs",
-  "buildCommand": "cd ../.. && npm run build --workspace=@cipta/dashboard",
-  "outputDirectory": "apps/dashboard/.next",
+  "buildCommand": "next build",
   "installCommand": "npm install"
 }
