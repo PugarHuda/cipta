@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { OptimizerAgent } from "@cipta/agent"
+import { OptimizerAgent } from "../../../lib/optimizer-agent"
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
   const { wallet, currentPrice } = await req.json()
