@@ -77,13 +77,13 @@ add_action("init", function() {
 });`,
 
     "Static HTML": `<!-- 1x1 tracking pixel — add to <body> -->
-<img src="https://YOUR_DEMO.railway.app/api/pixel/${wallet || "0xYOUR_WALLET"}"
+<img src="https://cipta-demo.railway.app/api/pixel/${wallet || "0xYOUR_WALLET"}"
      width="1" height="1" alt=""
      style="position:absolute;opacity:0;pointer-events:none" />
 
 <!-- Beacon script -->
 <script>
-  fetch("https://YOUR_DEMO.railway.app/api/beacon", {
+  fetch("https://cipta-demo.railway.app/api/beacon", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -102,7 +102,7 @@ export const config = {
 }
 
 export async function middleware(req: NextRequest) {
-  const res = await fetch("https://YOUR_DEMO.railway.app/verify", {
+  const res = await fetch("https://cipta-demo.railway.app/verify", {
     method: "POST",
     headers: {
       "content-type": "application/json",
