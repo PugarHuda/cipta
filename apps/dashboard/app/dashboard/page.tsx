@@ -16,7 +16,7 @@ function truncate(addr: string) {
   return `${addr.slice(0, 6)}···${addr.slice(-4)}`
 }
 
-const DEMO_SERVER = process.env.NEXT_PUBLIC_DEMO_SERVER_URL || "https://cipta-demo.railway.app"
+const DEMO_SERVER = process.env.NEXT_PUBLIC_DEMO_SERVER_URL || "https://cipta-demo-production.up.railway.app"
 const BOT_UAS = ["GPTBot/1.0", "ClaudeBot/1.0", "PerplexityBot/1.0", "Bytespider"]
 
 async function simulateBot(wallet: string) {

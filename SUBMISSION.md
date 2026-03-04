@@ -21,7 +21,7 @@ app.use(cipta({ wallet: "0xYOUR_WALLET", priceUSD: 0.001 }))
 | | URL |
 |--|--|
 | Dashboard | https://cipta.vercel.app |
-| Demo Server | https://cipta-demo.railway.app |
+| Demo Server | https://cipta-demo-production.up.railway.app |
 | npm | https://www.npmjs.com/package/@cipta/middleware |
 | GitHub | https://github.com/PugarHuda/cipta |
 
@@ -83,7 +83,7 @@ Disobedient scrapers that ignore robots.txt get logged + negative reputation.
 1. Visit https://cipta.vercel.app
 2. Connect wallet (Base Sepolia)
 3. Copy integration code from Settings tab
-4. Visit https://cipta-demo.railway.app/robots.txt — see honeypot trap
+4. Visit https://cipta-demo-production.up.railway.app/robots.txt — see honeypot trap
 
 ### Option B — Local Setup
 
@@ -115,19 +115,19 @@ Then:
 ### Option C — curl Test (No Setup)
 ```bash
 # 1. Bot kena 402 Payment Required
-curl -A "GPTBot/1.0" https://cipta-demo.railway.app/content/artikel-defi-2026
+curl -A "GPTBot/1.0" https://cipta-demo-production.up.railway.app/content/artikel-defi-2026
 
 # 2. robots.txt — semua AI bots listed sebagai Disallow
-curl https://cipta-demo.railway.app/robots.txt
+curl https://cipta-demo-production.up.railway.app/robots.txt
 
 # 3. Honeypot — scraper kena trap, return fake content
-curl https://cipta-demo.railway.app/cipta-trap/test
+curl https://cipta-demo-production.up.railway.app/cipta-trap/test
 
 # 4. Browser biasa — pass through gratis
-curl https://cipta-demo.railway.app/content/artikel-defi-2026
+curl https://cipta-demo-production.up.railway.app/content/artikel-defi-2026
 
 # 5. Health check
-curl https://cipta-demo.railway.app/health
+curl https://cipta-demo-production.up.railway.app/health
 ```
 
 **Creator wallet:** `0x0fc7b2C6Ed68f4553F4b2c7B52d4269a673B666f`

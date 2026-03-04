@@ -8,7 +8,7 @@ AI crawlers like GPTBot, ClaudeBot, and PerplexityBot scrape millions of article
 app.use(cipta({ wallet: "0xYOUR_WALLET", priceUSD: 0.001 }))
 ```
 
-🔗 **Live Demo:** https://cipta-demo.railway.app
+🔗 **Live Demo:** https://cipta-demo-production.up.railway.app
 📊 **Dashboard:** https://cipta.vercel.app
 📦 **npm:** `npm install @cipta/middleware`
 
