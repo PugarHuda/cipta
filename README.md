@@ -1,12 +1,16 @@
-# Cipta — Protect Your Content, Earn from AI
+# Cipta — Monetize Your Content for AI Agents
 
 > **Built for Base Batches 003 · Student Track**
 
-AI crawlers like GPTBot, ClaudeBot, and PerplexityBot scrape millions of articles, blogs, and creative works every day — for free. **Cipta** makes them pay. One line of code. USDC to your wallet. Automatically.
+AI crawlers like GPTBot, ClaudeBot, and PerplexityBot scrape millions of articles, blogs, and creative works every day — for free. **Cipta** makes them pay. One line of code. USDC or ETH to your wallet. Automatically.
 
 ```ts
 app.use(cipta({ wallet: "0xYOUR_WALLET", priceUSD: 0.001 }))
 ```
+
+🔗 **Live Demo:** https://cipta-demo.railway.app
+📊 **Dashboard:** https://cipta.vercel.app
+📦 **npm:** `npm install @cipta/middleware`
 
 ---
 
@@ -42,12 +46,14 @@ Humans and whitelisted bots (e.g. Googlebot) pass through freely. Only AI scrape
 ## Features
 
 - **One-line integration** — drop `cipta()` middleware into any Express app
-- **15+ AI crawlers detected** — GPTBot, ClaudeBot, PerplexityBot, Bytespider, Amazonbot, and more
-- **Per-bot pricing** — charge OpenAI 3x more than Perplexity if you want
-- **Whitelist** — let Googlebot in for free (SEO stays intact)
-- **USDC on Base** — payments via [x402 protocol](https://x402.org), gasless EIP-3009
-- **Real-time dashboard** — earnings, bot activity, and charts via Supabase
-- **AI price optimizer** — AI agent analyzes your access logs and recommends optimal pricing
+- **15+ AI crawlers detected** — GPTBot, ClaudeBot, PerplexityBot, Bytespider, and more
+- **x402 USDC payments** — gasless EIP-3009 micropayments on Base
+- **ETH payments** — native ETH support with `X-ETH-TX-HASH` header verification
+- **ERC-8004 reputation discounts** — trusted agents (score ≥ 90) get 40% off
+- **Honeypot trap** — `/cipta-trap/*` catches disobedient scrapers, logs + gives negative reputation
+- **Whitelist** — Googlebot gets in free (SEO stays intact)
+- **Real-time dashboard** — earnings, bot leaderboard, payment history, honeypot logs
+- **AI price optimizer** — LLM analyzes access logs and recommends optimal pricing
 - **Testnet ready** — Base Sepolia by default, one config change for mainnet
 
 ---
@@ -57,7 +63,9 @@ Humans and whitelisted bots (e.g. Googlebot) pass through freely. Only AI scrape
 | Layer | Tech |
 |-------|------|
 | Payment protocol | [x402](https://x402.org) (HTTP 402 + USDC on Base) |
+| ETH verification | [viem](https://viem.sh) — `getTransactionReceipt` |
 | Blockchain | [Base](https://base.org) / Base Sepolia |
+| Agent identity | [ERC-8004](https://eips.ethereum.org/EIPS/eip-8004) IdentityRegistry + ReputationRegistry |
 | Wallet integration | [OnchainKit](https://onchainkit.xyz) + Smart Wallet |
 | Database | [Supabase](https://supabase.com) (Postgres + Realtime) |
 | Dashboard | Next.js 15 + React 19 + Recharts |
@@ -75,6 +83,9 @@ cipta/
 │   │   └── src/
 │   │       ├── index.ts          # cipta() main export
 │   │       ├── bot-detector.ts   # AI crawler detection
+│   │       ├── erc8004.ts        # ERC-8004 reputation client
+│   │       ├── eth-verifier.ts   # ETH payment verifier (viem)
+│   │       ├── honeypot.ts       # Honeypot trap router
 │   │       ├── tracker.ts        # Supabase earnings logger
 │   │       └── types.ts          # TypeScript interfaces
 │   │
@@ -84,8 +95,8 @@ cipta/
 │           └── optimizer-agent.ts # AI-powered price recommendations
 │
 ├── apps/
-│   ├── demo/              # Express demo server (protected content)
-│   └── dashboard/         # Next.js creator dashboard
+│   ├── demo/              # Express demo server (Railway)
+│   └── dashboard/         # Next.js creator dashboard (Vercel)
 │
 └── supabase/
     └── migrations/        # Database schema
@@ -128,27 +139,29 @@ OPENROUTER_API_KEY=               # from openrouter.ai (free tier available)
 CREATOR_WALLET_ADDRESS=0xYOUR_WALLET
 SUPABASE_URL=
 SUPABASE_KEY=
+NETWORK=base-sepolia
+# SIGNER_KEY=0xYOUR_PRIVATE_KEY   # for ERC-8004 on-chain feedback
 ```
 
 ### 3. Setup Database
 
 ```bash
-# Install Supabase CLI (Windows)
-scoop bucket add supabase https://github.com/supabase/scoop-bucket.git
-scoop install supabase
-
 # Link and push schema
 supabase link --project-ref YOUR_PROJECT_REF
 supabase db push
 ```
 
-Or run `supabase/schema.sql` manually in the Supabase SQL Editor.
+Or run `supabase/migrations/` manually in the Supabase SQL Editor.
 
 ### 4. Run
 
 ```bash
+# From repo root (Turborepo — runs both in parallel)
+npm run dev
+
+# Or individually:
 # Terminal 1 — Demo server (port 3001)
-cd apps/demo && npx tsx src/server.ts
+cd apps/demo && npm run dev
 
 # Terminal 2 — Dashboard (port 3000)
 cd apps/dashboard && npm run dev
@@ -164,79 +177,127 @@ npm install @cipta/middleware
 
 ```ts
 import express from "express"
-import { cipta } from "@cipta/middleware"
+import { cipta, ciptaHoneypot, generateRobotsTxt } from "@cipta/middleware"
 
 const app = express()
 
+// Honeypot — catch disobedient scrapers
+app.use(ciptaHoneypot({ wallet: "0xYOUR_WALLET" }))
+
+// robots.txt — tells compliant bots to avoid the trap
+app.get("/robots.txt", (req, res) => {
+  res.type("text/plain").send(generateRobotsTxt("/cipta-trap/"))
+})
+
+// Payment middleware
 app.use(cipta({
-  wallet: "0xYOUR_WALLET_ADDRESS",   // receives USDC
-  priceUSD: 0.001,                   // $0.001 default per request
-  network: "base-sepolia",           // or "base" for mainnet
-  whitelist: ["Googlebot"],          // these bots get in free
-  botPricing: {
-    GPTBot: 0.003,                   // OpenAI pays 3x
-    ClaudeBot: 0.002,                // Anthropic pays 2x
-  },
-  supabaseUrl: process.env.SUPABASE_URL,     // optional tracking
+  wallet: "0xYOUR_WALLET_ADDRESS",  // receives USDC + ETH
+  priceUSD: 0.001,                          // $0.001 default per request
+  network: "base-sepolia",                  // or "base" for mainnet
+  erc8004: true,                            // reputation-based discounts
+  ethPayment: true,                         // accept native ETH too
+  whitelist: ["Googlebot"],                 // these bots pass for free
+  supabaseUrl: process.env.SUPABASE_URL,
   supabaseKey: process.env.SUPABASE_KEY,
 }))
-
-app.get("/content/:slug", (req, res) => {
-  res.json({ content: "your protected content" })
-})
 ```
 
-When a bot hits `/content/*`:
-1. Cipta detects the bot User-Agent
-2. Returns `HTTP 402` with USDC payment requirements
-3. x402-compatible bots pay automatically
-4. Content is delivered + earnings logged
+---
+
+## ERC-8004 Reputation Discounts
+
+When `erc8004: true`, agents with verified on-chain reputation get automatic discounts:
+
+| Score | Tier | Discount |
+|-------|------|----------|
+| ≥ 90 | TRUSTED | −40% |
+| ≥ 75 | VERIFIED | −20% |
+| < 75 | UNKNOWN | 0% |
+
+After each paid access, the middleware calls `giveFeedback(positive)` on-chain to build agent reputation.
+Honeypot traps trigger `giveFeedback(negative)`.
+
+---
+
+## Honeypot Trap
+
+`robots.txt` lists `/cipta-trap/*` as Disallow. Compliant agents skip it.
+Disobedient scrapers that visit the trap get:
+1. Logged in `honeypot_logs` table
+2. Negative ERC-8004 reputation feedback
+3. Future requests cost full price (no discount)
 
 ---
 
 ## Detected AI Crawlers
 
-| Bot | Company | Default Price |
-|-----|---------|--------------|
-| GPTBot | OpenAI | configurable |
-| ChatGPT-User | OpenAI | configurable |
-| ClaudeBot | Anthropic | configurable |
-| Claude-Web | Anthropic | configurable |
-| PerplexityBot | Perplexity | configurable |
-| Bytespider | ByteDance/TikTok | configurable |
-| Amazonbot | Amazon | configurable |
-| FacebookBot | Meta | configurable |
-| Meta-ExternalAgent | Meta | configurable |
-| YouBot | You.com | configurable |
-| Applebot | Apple | configurable |
-| cohere-ai | Cohere | configurable |
-| CCBot | Common Crawl | configurable |
-| Google-Extended | Google | configurable |
-| Diffbot | Diffbot | configurable |
+| Bot | Company |
+|-----|---------|
+| GPTBot | OpenAI |
+| ChatGPT-User | OpenAI |
+| ClaudeBot | Anthropic |
+| Claude-Web | Anthropic |
+| PerplexityBot | Perplexity |
+| Bytespider | ByteDance/TikTok |
+| Amazonbot | Amazon |
+| FacebookBot | Meta |
+| YouBot | You.com |
+| Applebot | Apple |
+| cohere-ai | Cohere |
+| CCBot | Common Crawl |
+| Google-Extended | Google |
+| Diffbot | Diffbot |
 
 ---
 
-## AI Price Optimizer
+## Dashboard
 
-The `OptimizerAgent` analyzes 30 days of access logs and recommends optimal pricing per bot using AI.
+Connect your wallet at [https://cipta.vercel.app/dashboard](https://cipta.vercel.app/dashboard) to see:
 
-```ts
-import { OptimizerAgent } from "@cipta/agent"
+- **Overview** — earnings KPIs, 30-day chart, bot leaderboard, honeypot status, embed code
+- **Bots** — all detected agents, sortable by earnings / requests / paid
+- **Honeypot** — capture log with ERC-8004 agent IDs
+- **Payments** — transaction history (x402 USDC, ETH, whitelist), filterable, Basescan links
+- **Settings** — wallet info, integration code (Node.js / WordPress / Static HTML / Vercel Edge)
 
-const optimizer = new OptimizerAgent({
-  openrouterApiKey: process.env.OPENROUTER_API_KEY,
-  supabaseUrl: process.env.SUPABASE_URL,
-  supabaseKey: process.env.SUPABASE_KEY,
-})
+---
 
-const result = await optimizer.analyzeAndOptimize("0xYOUR_WALLET", 0.001)
-// {
-//   recommendations: [
-//     { bot: "GPTBot", currentPrice: 0.001, recommendedPrice: 0.003, reason: "Pay rate 95%" }
-//   ],
-//   summary: "...",
-//   projectedMonthlyIncrease: 12.50
-// }
+## Deployment
+
+### Dashboard → Vercel
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# From apps/dashboard
+cd apps/dashboard
+vercel
+
+# Set environment variables in Vercel dashboard or via CLI:
+vercel env add NEXT_PUBLIC_ONCHAINKIT_API_KEY
+vercel env add NEXT_PUBLIC_SUPABASE_URL
+vercel env add NEXT_PUBLIC_SUPABASE_KEY
+vercel env add OPENROUTER_API_KEY
+```
+
+### Demo Server → Railway
+
+```bash
+# Install Railway CLI
+npm i -g @railway/cli
+
+# From apps/demo
+cd apps/demo
+railway login
+railway init
+railway up
+
+# Set environment variables:
+railway variables set CREATOR_WALLET_ADDRESS=0xYOUR_WALLET
+railway variables set SUPABASE_URL=https://xxx.supabase.co
+railway variables set SUPABASE_KEY=your_anon_key
+railway variables set NETWORK=base-sepolia
 ```
 
 ---
@@ -252,19 +313,6 @@ x402 is an open payment protocol built on HTTP 402 ("Payment Required"):
 5. Creator receives USDC directly to their wallet
 
 No intermediary holds funds. No custodial risk. Direct wallet-to-wallet.
-
----
-
-## Dashboard
-
-Open [http://localhost:3000/dashboard](http://localhost:3000/dashboard) and connect your wallet to see:
-
-- **Total earnings** (all-time + today)
-- **30-day earnings chart**
-- **Top bots** by revenue
-- **Recent activity** log with real-time updates
-- **Embed code** for quick integration
-- **AI optimizer** — get price recommendations
 
 ---
 

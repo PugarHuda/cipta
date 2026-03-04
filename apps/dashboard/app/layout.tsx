@@ -16,8 +16,22 @@ const mono = IBM_Plex_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Cipta — Protect Your Content, Earn from AI",
-  description: "Let AI crawlers pay for your content via x402 on Base",
+  title: "Cipta — Make AI Agents Pay for Your Content",
+  description: "AI crawlers scrape your content for free. Cipta makes them pay via USDC on Base. One line of code.",
+  openGraph: {
+    title: "Cipta — Make AI Agents Pay for Your Content",
+    description: "AI crawlers scrape your content for free. Cipta makes them pay via USDC on Base. One line of code.",
+    url: "https://cipta.vercel.app",
+    siteName: "Cipta",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cipta — Make AI Agents Pay for Your Content",
+    description: "AI crawlers scrape your content for free. Cipta makes them pay via USDC on Base. One line of code.",
+    creator: "@PugarHuda",
+  },
+  keywords: ["x402", "ERC-8004", "AI agents", "Base", "USDC", "content monetization", "micropayments"],
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

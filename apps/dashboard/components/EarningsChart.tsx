@@ -1,7 +1,8 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { createClient } from "@supabase/supabase-js"
+import supabase from "../lib/supabase"
+import { useRefreshTick } from "../context/RealtimeContext"
 import {
   AreaChart,
   Area,
@@ -13,10 +14,6 @@ import {
   ReferenceLine,
 } from "recharts"
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_KEY!
-)
 
 function CustomTooltip({ active, payload, label }: any) {
   if (!active || !payload?.length) return null
@@ -43,6 +40,7 @@ function CustomTooltip({ active, payload, label }: any) {
 export function EarningsChart({ walletAddress }: { walletAddress: string }) {
   const [data, setData] = useState<{ date: string; earned: number }[]>([])
   const [loading, setLoading] = useState(true)
+  const tick = useRefreshTick()
   const maxEarned = data.length ? Math.max(...data.map((d) => d.earned)) : 0
 
   useEffect(() => {
@@ -65,7 +63,7 @@ export function EarningsChart({ walletAddress }: { walletAddress: string }) {
       setLoading(false)
     }
     fetchChartData()
-  }, [walletAddress])
+  }, [walletAddress, tick])
 
   return (
     <div

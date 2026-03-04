@@ -1,9 +1,8 @@
 {
   "mcpServers": {
     "pencil": {
-      "command": "C:\\Users\\ASUS\\.vscode\\extensions\\highagency.pencildev-0.6.28\\out\\mcp-server-win32-x64.exe",
-      "args": ["--app", "visual_studio_code"],
-      "env": {},
+      "command": "pencil-mcp",
+      "args": ["--app", "claude-code"],
       "type": "stdio"
     }
   }

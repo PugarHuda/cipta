@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Copy, Check, Circle } from "lucide-react"
 
 type Tab = "node" | "wordpress" | "static" | "vercel"
@@ -131,6 +131,12 @@ export const config = {
   const meta = TAB_META[tab]
   const code = raw[tab]
 
+  // Memoize per-tab agar regex tidak jalan ulang setiap render
+  const colorizedLines = useMemo(
+    () => code.split("\n").map((line) => colorize(line || " ", meta.lang)),
+    [code, meta.lang]
+  )
+
   const handleCopy = () => {
     navigator.clipboard.writeText(code)
     setCopied(true)
@@ -202,7 +208,7 @@ export const config = {
       <div className="flex-1 overflow-auto p-4" style={{ fontFamily: "var(--font-data)" }}>
         <table className="w-full border-collapse text-[11px] leading-[1.7]">
           <tbody>
-            {code.split("\n").map((line, i) => (
+            {colorizedLines.map((html, i) => (
               <tr key={i} className="group">
                 <td
                   className="pr-4 select-none text-right w-6 align-top"
@@ -213,7 +219,7 @@ export const config = {
                 <td>
                   <span
                     style={{ color: "#CDD9F0" }}
-                    dangerouslySetInnerHTML={{ __html: colorize(line || " ", meta.lang) || "&nbsp;" }}
+                    dangerouslySetInnerHTML={{ __html: html || "&nbsp;" }}
                   />
                 </td>
               </tr>

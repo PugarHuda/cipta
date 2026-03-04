@@ -1,14 +1,10 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { createClient } from "@supabase/supabase-js"
+import supabase from "../lib/supabase"
+import { useRefreshTick } from "../context/RealtimeContext"
 import type { CreatorEarnings } from "@cipta/middleware"
 import { TrendingUp, Activity, DollarSign, Percent } from "lucide-react"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_KEY!
-)
 
 function useCountUp(target: number, duration = 900, decimals = 4) {
   const [value, setValue] = useState(0)
@@ -161,6 +157,7 @@ export function EarningsCard({ walletAddress }: { walletAddress: string }) {
     top_bots: [],
   })
   const [loading, setLoading] = useState(true)
+  const tick = useRefreshTick()
 
   useEffect(() => {
     async function fetchEarnings() {
@@ -194,15 +191,7 @@ export function EarningsCard({ walletAddress }: { walletAddress: string }) {
 
     fetchEarnings()
 
-    const channel = supabase
-      .channel("earnings_realtime")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "access_logs" }, () => {
-        fetchEarnings()
-      })
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [walletAddress])
+  }, [walletAddress, tick])
 
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

@@ -8,14 +8,37 @@ import { BotActivityTable } from "../../components/BotActivityTable"
 import { EarningsChart } from "../../components/EarningsChart"
 import { EmbedCode } from "../../components/EmbedCode"
 import HoneypotCard from "../../components/HoneypotCard"
-import { Wifi } from "lucide-react"
+import { RealtimeProvider } from "../../context/RealtimeContext"
+import { Wifi, Zap } from "lucide-react"
+import { useState } from "react"
 
 function truncate(addr: string) {
   return `${addr.slice(0, 6)}···${addr.slice(-4)}`
 }
 
+const DEMO_SERVER = process.env.NEXT_PUBLIC_DEMO_SERVER_URL || "https://cipta-demo.railway.app"
+const BOT_UAS = ["GPTBot/1.0", "ClaudeBot/1.0", "PerplexityBot/1.0", "Bytespider"]
+
+async function simulateBot(wallet: string) {
+  const ua = BOT_UAS[Math.floor(Math.random() * BOT_UAS.length)]
+  try {
+    await fetch(`${DEMO_SERVER}/content/artikel-defi-2026`, {
+      headers: { "User-Agent": ua, "X-Creator-Wallet": wallet },
+      mode: "no-cors",
+    })
+  } catch { /* no-cors, expected */ }
+}
+
 export default function DashboardPage() {
   const { address, isConnected } = useAccount()
+  const [simulating, setSimulating] = useState(false)
+
+  async function handleSimulate() {
+    if (!address || simulating) return
+    setSimulating(true)
+    await simulateBot(address)
+    setTimeout(() => setSimulating(false), 2000)
+  }
 
   if (!isConnected) {
     return (
@@ -106,6 +129,24 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Simulate bot button */}
+            <button
+              onClick={handleSimulate}
+              disabled={simulating}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-[600] tracking-[0.06em] transition-all"
+              style={{
+                background: simulating ? "rgba(245,158,11,0.15)" : "rgba(245,158,11,0.07)",
+                border: `1px solid rgba(245,158,11,${simulating ? "0.4" : "0.2"})`,
+                color: "var(--amber)",
+                fontFamily: "var(--font-data)",
+                cursor: simulating ? "wait" : "pointer",
+              }}
+              title="Kirim request bot ke demo server — cocok untuk demo"
+            >
+              <Zap size={10} />
+              {simulating ? "SENDING…" : "SIMULATE BOT"}
+            </button>
+
             {/* Network badge */}
             <div
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-[600] tracking-[0.06em]"
@@ -125,6 +166,7 @@ export default function DashboardPage() {
 
         {/* Main scroll area */}
         <main className="flex-1 overflow-y-auto px-6 py-6 space-y-5">
+        <RealtimeProvider>
 
           {/* Row 1 — KPI Cards */}
           <div className="fade-up fade-up-1">
@@ -153,6 +195,7 @@ export default function DashboardPage() {
 
           {/* Bottom padding */}
           <div className="h-4" />
+        </RealtimeProvider>
         </main>
       </div>
     </div>

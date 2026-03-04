@@ -1,13 +1,9 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { createClient } from "@supabase/supabase-js"
+import supabase from "../lib/supabase"
+import { useRefreshTick } from "../context/RealtimeContext"
 import type { BotStats } from "@cipta/middleware"
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_KEY!
-)
 
 // Deterministic color per bot name
 function botColor(name: string): string {
@@ -41,6 +37,7 @@ export function BotActivityTable({ walletAddress }: { walletAddress: string }) {
   const [bots, setBots]           = useState<BotStats[]>([])
   const [recentLogs, setRecentLogs] = useState<any[]>([])
   const [loading, setLoading]     = useState(true)
+  const tick = useRefreshTick()
 
   useEffect(() => {
     async function fetchData() {
@@ -64,15 +61,7 @@ export function BotActivityTable({ walletAddress }: { walletAddress: string }) {
 
     fetchData()
 
-    const channel = supabase
-      .channel("bot_activity")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "access_logs" }, () => {
-        fetchData()
-      })
-      .subscribe()
-
-    return () => { supabase.removeChannel(channel) }
-  }, [walletAddress])
+  }, [walletAddress, tick])
 
   const maxEarned = bots.length ? Math.max(...bots.map((b) => b.total_earned_usd)) : 1
 

@@ -1,0 +1,12 @@
+{
+  "framework": "nextjs",
+  "buildCommand": "cd ../.. && npm run build --workspace=@cipta/dashboard",
+  "outputDirectory": "apps/dashboard/.next",
+  "installCommand": "npm install",
+  "env": {
+    "NEXT_PUBLIC_ONCHAINKIT_API_KEY": "@onchainkit_api_key",
+    "NEXT_PUBLIC_SUPABASE_URL": "@supabase_url",
+    "NEXT_PUBLIC_SUPABASE_KEY": "@supabase_key",
+    "OPENROUTER_API_KEY": "@openrouter_api_key"
+  }
+}

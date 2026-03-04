@@ -49,7 +49,7 @@ SELECT
 FROM honeypot_logs
 GROUP BY creator_wallet;
 
--- Update top_bots view (already handles the new status via existing filter)
+-- Update top_bots view — include ERC-8004 reputation data
 CREATE OR REPLACE VIEW top_bots AS
 SELECT
   creator_wallet,
@@ -57,6 +57,8 @@ SELECT
   COUNT(*) AS total_requests,
   COUNT(*) FILTER (WHERE status = 'paid') AS total_paid,
   COALESCE(SUM(amount_usd) FILTER (WHERE status = 'paid'), 0) AS total_earned_usd,
+  MAX(erc8004_score)    AS erc8004_score,
+  MAX(erc8004_agent_id) AS erc8004_agent_id,
   MAX(timestamp) AS last_seen
 FROM access_logs
 GROUP BY creator_wallet, bot_agent
