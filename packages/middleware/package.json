@@ -1,6 +1,6 @@
 {
   "name": "@cipta/middleware",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Cipta x402 middleware — protect content from AI scrapers",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

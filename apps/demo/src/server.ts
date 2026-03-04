@@ -63,6 +63,17 @@ app.get("/api/pixel/:wallet", (req, res) => {
   res.send(gif)
 })
 
+// ─── Health check — MUST be before cipta middleware ───────────────────
+app.get("/health", (_req, res) => {
+  res.json({
+    status: "ok",
+    protected_by: "Cipta",
+    features: ["x402/USDC", "ETH payment", "ERC-8004 reputation", "honeypot"],
+    network: NETWORK,
+    wallet: WALLET,
+  })
+})
+
 // ─── Cipta middleware — protects all /content/* routes ───────────────
 app.use(cipta(ciptaConfig))
 
@@ -99,17 +110,6 @@ app.get("/content/analisis-base-2026", (req, res) => {
     `,
     readTime: "5 menit",
     _protected_by: "Cipta x402 + ERC-8004",
-  })
-})
-
-// ─── Health check ─────────────────────────────────────────────────────
-app.get("/health", (_req, res) => {
-  res.json({
-    status: "ok",
-    protected_by: "Cipta",
-    features: ["x402/USDC", "ETH payment", "ERC-8004 reputation", "honeypot"],
-    network: NETWORK,
-    wallet: WALLET,
   })
 })
 
